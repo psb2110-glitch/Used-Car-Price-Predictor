@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="static/css/style.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+
+    <title>Used Car Price Predictor</title>
+</head>
+
+<body class="bg-dark">
+
+<div class="container">
+    <div class="row">
+        <div class="card mt-50" style="width: 100%; height: 100%">
+            <div class="card-header text-center">
+                <h1>USED CAR PRICE PREDICTOR</h1>
+
+                <p style="
+                    font-size: 20px;
+                    color: #666;
+                    margin-top: 10px;
+                    font-weight: 500;">
+                    Buy or Sell • Get the Right Price of the Car
+                </p>
+
+            </div>
+
+            <div class="card-body">
+
+                <form method="post" accept-charset="utf-8">
+                    <div class="form-group text-center">
+                        <label><b>Select Car Brand</b></label>
+                        <select class="form-control" id="company" name="company" required onchange="load_car_models(this.id, 'car_model')">
+                            {% for company in companies %}
+                                <option value="{{ company }}">{{ company }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <label><b>Select Model</b></label>
+                        <select class="form-control" id="car_model" name="car_model" required>
+                            {% for model in car_models %}
+                                <option value="{{ model }}">{{ model }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <label><b>Select Year of Purchase</b></label>
+                        <select class="form-control" id="year" name="year" required>
+                            {% for year in years %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <label><b>Select Fuel Type</b></label>
+                        <select class="form-control" id="fuel_type" name="fuel_type" required>
+                            {% for fuel_type in fuel_types %}
+                                <option value="{{ fuel_type }}">{{ fuel_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <label><b>Enter Number of Kilometers Driven</b></label>
+                        <input class="form-control" type="text" name="kilo_driven" placeholder="Enter no of kilometers driven" style="text-align: center">
+                        <br>
+                        <button type="button" class="btn btn-primary form-control" onclick="send_data()">Predict Price</button>
+                    </div>
+                </form>
+
+                <br>
+
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <h3><span id="prediction"></span></h3>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h2 class="text-center mt-4">Compare Two Cars</h2>
+
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <h4 class="text-center">Car 1</h4>
+
+                        <label><b>Select Brand</b></label>
+                        <select class="form-control" id="company1" onchange="load_car_models(this.id, 'car_model1')">
+                            {% for company in companies %}
+                                <option value="{{ company }}">{{ company }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Select Model</b></label>
+                        <select class="form-control" id="car_model1">
+                            {% for model in car_models %}
+                                <option value="{{ model }}">{{ model }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Select Year</b></label>
+                        <select class="form-control" id="year1">
+                            {% for year in years %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Select Fuel Type</b></label>
+                        <select class="form-control" id="fuel_type1">
+                            {% for fuel_type in fuel_types %}
+                                <option value="{{ fuel_type }}">{{ fuel_type }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Kilometers Driven</b></label>
+                        <input class="form-control" type="text" id="kilo_driven1" placeholder="Enter kilometers">
+                    </div>
+
+                    <div class="col-md-6">
+                        <h4 class="text-center">Car 2</h4>
+
+                        <label><b>Select Brand</b></label>
+                        <select class="form-control" id="company2" onchange="load_car_models(this.id, 'car_model2')">
+                            {% for company in companies %}
+                                <option value="{{ company }}">{{ company }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Select Model</b></label>
+                        <select class="form-control" id="car_model2">
+                            {% for model in car_models %}
+                                <option value="{{ model }}">{{ model }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Select Year</b></label>
+                        <select class="form-control" id="year2">
+                            {% for year in years %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Select Fuel Type</b></label>
+                        <select class="form-control" id="fuel_type2">
+                            {% for fuel_type in fuel_types %}
+                                <option value="{{ fuel_type }}">{{ fuel_type }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><b>Kilometers Driven</b></label>
+                        <input class="form-control" type="text" id="kilo_driven2" placeholder="Enter kilometers">
+                    </div>
+
+                </div>
+
+                <br>
+
+                <button type="button" class="btn btn-success form-control" onclick="compare_cars()">Compare Cars</button>
+
+                <br><br>
+
+                <div id="compare_result" class="text-center"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function load_car_models(company_id, car_model_id)
+    {
+        var company = document.getElementById(company_id);
+        var car_model = document.getElementById(car_model_id);
+
+        car_model.innerHTML = "";
+
+        {% for company in companies %}
+            if(company.value == "{{ company }}")
+            {
+                {% for model in car_models %}
+                    {% if model.startswith(company) %}
+                        var newOption = document.createElement("option");
+                        newOption.value = "{{ model }}";
+                        newOption.innerHTML = "{{ model }}";
+                        car_model.add(newOption);
+                    {% endif %}
+                {% endfor %}
+            }
+        {% endfor %}
+    }
+
+
+    function send_data()
+    {
+        var form = document.querySelector('form');
+        var fd = new FormData(form);
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '/predict', true);
+
+        document.getElementById("prediction").innerHTML =
+            "PLEASE WAIT FOR A WHILE! Calculating the right price of your car...";
+
+        xhr.onreadystatechange = function()
+        {
+            if(xhr.readyState == XMLHttpRequest.DONE)
+            {
+                var result = JSON.parse(xhr.responseText);
+
+                document.getElementById("prediction").innerHTML =
+                    `
+                    <div style="margin-top:20px;">
+                        <h2>Predicted Price: ₹${result.price}</h2>
+                        <h4>Estimated Price Range: ₹${result.lower_price} - ₹${result.upper_price}</h4>
+
+                        <hr>
+
+                        <h4>Car Details</h4>
+                        <p><b>Brand:</b> ${result.company}</p>
+                        <p><b>Model:</b> ${result.car_model}</p>
+                        <p><b>Year:</b> ${result.year}</p>
+                        <p><b>Fuel Type:</b> ${result.fuel_type}</p>
+                        <p><b>Kilometers Driven:</b> ${result.kms_driven} km</p>
+                    </div>
+                    `;
+            }
+        }
+
+        xhr.send(fd);
+    }
+
+
+    function compare_cars()
+    {
+        var fd = new FormData();
+
+        fd.append("company1", document.getElementById("company1").value);
+        fd.append("car_model1", document.getElementById("car_model1").value);
+        fd.append("year1", document.getElementById("year1").value);
+        fd.append("fuel_type1", document.getElementById("fuel_type1").value);
+        fd.append("kilo_driven1", document.getElementById("kilo_driven1").value);
+
+        fd.append("company2", document.getElementById("company2").value);
+        fd.append("car_model2", document.getElementById("car_model2").value);
+        fd.append("year2", document.getElementById("year2").value);
+        fd.append("fuel_type2", document.getElementById("fuel_type2").value);
+        fd.append("kilo_driven2", document.getElementById("kilo_driven2").value);
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "/compare", true);
+
+        document.getElementById("compare_result").innerHTML = "Comparing cars...";
+
+        xhr.onreadystatechange = function()
+        {
+            if(xhr.readyState == XMLHttpRequest.DONE)
+            {
+                var result = JSON.parse(xhr.responseText);
+
+                document.getElementById("compare_result").innerHTML =
+                `
+                    <hr>
+
+                    <h2>Comparison Result</h2>
+
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Car</th>
+                            <th>Predicted Price</th>
+                        </tr>
+
+                        <tr>
+                            <td>${result.car1}</td>
+                            <td>₹${result.price1}</td>
+                        </tr>
+
+                        <tr>
+                            <td>${result.car2}</td>
+                            <td>₹${result.price2}</td>
+                        </tr>
+                    </table>
+
+                    <h3>${result.message}</h3>
+                    <h4>Price Difference: ₹${result.difference}</h4>
+                `;
+            }
+        };
+
+        xhr.send(fd);
+    }
+
+
+    window.onload = function()
+    {
+        load_car_models('company', 'car_model');
+        load_car_models('company1', 'car_model1');
+        load_car_models('company2', 'car_model2');
+    }
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>
