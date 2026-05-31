@@ -121,6 +121,6 @@ http://127.0.0.1:5000
 
 ## Author
 
-Priyanshu Bhuyan
+Priyanshu Sekhar Bhuyan
 
 B.Tech Computer Science and Engineering Student
